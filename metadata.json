@@ -1,0 +1,6 @@
+{
+  "name": "СтудПульс",
+  "description": "Современное приложение для учёта заданий в колледже по предметам, контроля этапа выполнения, правок и дедлайнов с AI-помощником Gemini и синхронизацией через Google.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

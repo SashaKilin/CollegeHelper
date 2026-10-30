@@ -1,0 +1,126 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidSubject(data) {
+      return data.keys().hasAll([
+               'userId', 'name', 'teacher', 'colorHex', 'iconKey', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'name', 'teacher', 'colorHex', 'iconKey', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+             data.teacher is string && data.teacher.size() <= 100 &&
+             data.colorHex is string && data.colorHex.size() >= 4 && data.colorHex.size() <= 9 &&
+             data.iconKey is string && data.iconKey.size() >= 1 && data.iconKey.size() <= 30 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAssignment(data) {
+      return data.keys().hasAll([
+               'userId', 'subjectId', 'subjectName', 'subjectColorHex',
+               'title', 'workType', 'stage', 'progressPercent',
+               'currentProgressNote', 'revisionNotes', 'checklistItems',
+               'dueDateMillis', 'priority', 'createdAt', 'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId', 'subjectId', 'subjectName', 'subjectColorHex',
+               'title', 'workType', 'stage', 'progressPercent',
+               'currentProgressNote', 'revisionNotes', 'checklistItems',
+               'dueDateMillis', 'priority', 'createdAt', 'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.subjectId is string && data.subjectId.size() >= 1 && data.subjectId.size() <= 128 &&
+             data.subjectName is string && data.subjectName.size() >= 1 && data.subjectName.size() <= 80 &&
+             data.subjectColorHex is string && data.subjectColorHex.size() >= 4 && data.subjectColorHex.size() <= 9 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 160 &&
+             data.workType is string && data.workType in ['LAB', 'COURSEWORK', 'ESSAY', 'PRACTICE', 'SEMINAR', 'EXAM', 'PROJECT'] &&
+             data.stage is string && data.stage in ['NOT_STARTED', 'RESEARCH', 'DRAFTING', 'REVISION', 'READY', 'SUBMITTED'] &&
+             data.progressPercent is int && data.progressPercent >= 0 && data.progressPercent <= 100 &&
+             data.currentProgressNote is string && data.currentProgressNote.size() <= 1000 &&
+             data.revisionNotes is string && data.revisionNotes.size() <= 1500 &&
+             data.checklistItems is list && data.checklistItems.size() <= 25 &&
+             (data.checklistItems.size() == 0 || (data.checklistItems[0] is string && data.checklistItems[0].size() <= 300)) &&
+             data.dueDateMillis is int && data.dueDateMillis > 0 &&
+             data.priority is string && data.priority in ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/subjects/{subjectId} {
+      allow get: if isSignedIn() && isValidId(userId) && isValidId(subjectId) &&
+                    request.auth.uid == userId && existing().userId == request.auth.uid;
+
+      allow list: if isSignedIn() && isValidId(userId) &&
+                     request.auth.uid == userId && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() && isValidId(userId) && isValidId(subjectId) &&
+                       request.auth.uid == userId &&
+                       isValidSubject(incoming());
+
+      allow update: if isValidSubject(incoming()) &&
+                       isSignedIn() && isValidId(userId) && isValidId(subjectId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'teacher', 'colorHex', 'iconKey', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && isValidId(subjectId) &&
+                       request.auth.uid == userId && existing().userId == request.auth.uid;
+    }
+
+    match /users/{userId}/assignments/{assignmentId} {
+      allow get: if isSignedIn() && isValidId(userId) && isValidId(assignmentId) &&
+                    request.auth.uid == userId && existing().userId == request.auth.uid;
+
+      allow list: if isSignedIn() && isValidId(userId) &&
+                     request.auth.uid == userId && existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() && isValidId(userId) && isValidId(assignmentId) &&
+                       request.auth.uid == userId &&
+                       isValidAssignment(incoming());
+
+      allow update: if isValidAssignment(incoming()) &&
+                       isSignedIn() && isValidId(userId) && isValidId(assignmentId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'subjectId', 'subjectName', 'subjectColorHex',
+                         'title', 'workType', 'stage', 'progressPercent',
+                         'currentProgressNote', 'revisionNotes', 'checklistItems',
+                         'dueDateMillis', 'priority', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() && isValidId(userId) && isValidId(assignmentId) &&
+                       request.auth.uid == userId && existing().userId == request.auth.uid;
+    }
+  }
+}

@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">СтудПульс</string>
+    <string name="auth_subtitle">Умный трекер заданий в колледже, этапов прогресса, доработок и дедлайнов</string>
+    <string name="btn_sign_in_google">Войти через Google</string>
+    <string name="btn_sign_out">Выйти из аккаунта</string>
+    <string name="tab_assignments">Задания</string>
+    <string name="tab_subjects">Предметы</string>
+    <string name="tab_ai_assistant">AI Gemini</string>
+    <string name="fab_add_assignment">Новое задание</string>
+    <string name="fab_add_subject">Добавить предмет</string>
+    <string name="empty_assignments_title">Заданий пока нет</string>
+    <string name="empty_assignments_hint">Добавьте лабораторную, курсовую или семинар, чтобы отслеживать прогресс и правки</string>
+    <string name="empty_subjects_title">Предметы не добавлены</string>
+    <string name="empty_subjects_hint">Создайте свои дисциплины или загрузите базовый набор предметов колледжа в 1 клик</string>
+    <string name="btn_seed_subjects">Загрузить базовые предметы</string>
+    <string name="label_current_progress">На каком этапе сейчас / На чём остановился</string>
+    <string name="label_what_to_revise">Что надо доработать / Замечания</string>
+    <string name="label_select_due_date">Дата сдачи (Дедлайн)</string>
+    <string name="btn_ai_breakdown">Разбить на шаги с Gemini</string>
+    <string name="btn_ai_study_plan">Составить план фокуса на сегодня</string>
+    <string name="save_button">Сохранить</string>
+    <string name="cancel_button">Отмена</string>
+</resources>

@@ -1,0 +1,173 @@
+{
+  "entities": {
+    "Subject": {
+      "title": "Subject",
+      "description": "A college course or academic subject owned by a student.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated owner."
+        },
+        "name": {
+          "type": "string",
+          "description": "Subject title (1..80 chars)."
+        },
+        "teacher": {
+          "type": "string",
+          "description": "Teacher name or room notes (0..100 chars)."
+        },
+        "colorHex": {
+          "type": "string",
+          "description": "Hex color accent for subject badge (4..9 chars)."
+        },
+        "iconKey": {
+          "type": "string",
+          "description": "Icon identifier for subject category (1..30 chars)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when subject was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when subject was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "teacher",
+        "colorHex",
+        "iconKey",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Assignment": {
+      "title": "Assignment",
+      "description": "A college assignment with subject categorization, progress stage, current stop-point, revision checklist, and deadline.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "UID of the authenticated student."
+        },
+        "subjectId": {
+          "type": "string",
+          "description": "ID of the associated Subject."
+        },
+        "subjectName": {
+          "type": "string",
+          "description": "Denormalized name of the Subject for fast display."
+        },
+        "subjectColorHex": {
+          "type": "string",
+          "description": "Denormalized color hex of the Subject."
+        },
+        "title": {
+          "type": "string",
+          "description": "Assignment title or topic (1..160 chars)."
+        },
+        "workType": {
+          "type": "string",
+          "enum": [
+            "LAB",
+            "COURSEWORK",
+            "ESSAY",
+            "PRACTICE",
+            "SEMINAR",
+            "EXAM",
+            "PROJECT"
+          ],
+          "description": "Type of college assignment."
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "NOT_STARTED",
+            "RESEARCH",
+            "DRAFTING",
+            "REVISION",
+            "READY",
+            "SUBMITTED"
+          ],
+          "description": "Current workflow progress stage."
+        },
+        "progressPercent": {
+          "type": "integer",
+          "description": "Numeric completion percentage from 0 to 100."
+        },
+        "currentProgressNote": {
+          "type": "string",
+          "description": "Detailed note on where the student currently stopped (0..1000 chars)."
+        },
+        "revisionNotes": {
+          "type": "string",
+          "description": "What needs to be revised, fixed, or improved (0..1500 chars)."
+        },
+        "checklistItems": {
+          "type": "array",
+          "description": "Bounded list (<= 25) of revision or sub-task strings prefixed with [ ] or [x]."
+        },
+        "dueDateMillis": {
+          "type": "integer",
+          "description": "Deadline timestamp in epoch milliseconds."
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH",
+            "CRITICAL"
+          ],
+          "description": "Urgency priority level."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "subjectId",
+        "subjectName",
+        "subjectColorHex",
+        "title",
+        "workType",
+        "stage",
+        "progressPercent",
+        "currentProgressNote",
+        "revisionNotes",
+        "checklistItems",
+        "dueDateMillis",
+        "priority",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/subjects/{subjectId}": {
+      "schema": {
+        "$ref": "#/entities/Subject"
+      },
+      "description": "Per-user collection of college subjects."
+    },
+    "/users/{userId}/assignments/{assignmentId}": {
+      "schema": {
+        "$ref": "#/entities/Assignment"
+      },
+      "description": "Per-user collection of college assignments with progress tracking and revision items."
+    }
+  }
+}
